@@ -2,6 +2,7 @@
   (:require [clojure.string :as s]
             [clj-evohome.http :refer :all]
             [cheshire.core :as json]
+            [camel-snake-kebab.core :as csk]
             [java-time :as jt]))
 
 
@@ -18,7 +19,7 @@
                                :headers {:authorization "Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg=="}})
                    :json)]
     (assoc tokens :expires (jt/plus (jt/local-date-time)
-                                    (jt/seconds (:expires_in tokens))))))
+                                    (jt/seconds (:expires-in tokens))))))
 
 (defn- basic-login [username password]
   (get-auth-tokens {:grant_type "password"
@@ -29,7 +30,7 @@
 (defn- refresh-tokens [tokens]
   (get-auth-tokens {:grant_type "refresh_token"
                     :scope (:scope tokens)
-                    :refresh_token (:refresh_token tokens)}))
+                    :refresh_token (:refresh-token tokens)}))
 
 (def connect)
 
@@ -57,9 +58,9 @@
      :password password}))
 
 (defn- make-http-headers [connection]
-  (let [{:keys [access_token token_type]} (auth-tokens connection)]
+  (let [{:keys [access-token token-type]} (auth-tokens connection)]
     {:accept "application/json"
-     :authorization (str token_type " " access_token)}))
+     :authorization (str token-type " " access-token)}))
 
 (defn api-call [connection op path & {:as opts}]
   (:json (op (str api-url "/" path)
@@ -90,7 +91,7 @@
 (defn- zone-heat-set-point [connection zone-type zone-id data]
   (api-call connection http-put (str zone-type "/" zone-id "/heatSetPoint")
             :content-type "application/json"
-            :body (json/generate-string data)))
+            :body (json/generate-string data {:key-fn csk/->camelCaseString})))
 
 (defn set-zone-temperature [connection zone-id temperature & {:keys [until]}]
   (zone-heat-set-point connection "temperatureZone" zone-id
@@ -110,7 +111,7 @@
 (defn set-zone-schedule [connection zone-id schedule]
   (api-call connection http-put (str "temperatureZone/" zone-id "/schedule")
             :content-type "application/json"
-            :body (json/generate-string schedule)))
+            :body (json/generate-string schedule {:key-fn csk/->camelCaseString})))
 
 (defn get-location-status [connection location-id]
   (api-call connection http-get (str "location/" location-id "/status")

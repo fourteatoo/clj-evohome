@@ -6,5 +6,6 @@
   :dependencies [[org.clojure/clojure "1.10.3"]
                  [clojure.java-time "0.3.3"]
                  [clj-http "3.12.3"]
-                 [cheshire "5.10.1"]]
+                 [cheshire "5.10.1"]
+                 [camel-snake-kebab "0.4.2"]]
   :repl-options {:init-ns clj-evohome.api2})

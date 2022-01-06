@@ -2,7 +2,8 @@
   (:require [clojure.string :as s]
             [clj-http.client :as http]
             clj-http.cookies
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [camel-snake-kebab.core :as csk]))
 
 (def make-cookie-store
   clj-http.cookies/cookie-store)
@@ -30,7 +31,7 @@
                       (assoc response :json
                              (-> response
                                  :body
-                                 (json/parse-string true)))
+                                 (json/parse-string csk/->kebab-case-keyword)))
                       response))]
       (-> (try
             (action (str url)
