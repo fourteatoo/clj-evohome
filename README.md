@@ -14,28 +14,70 @@ Require the library in your source code. API2 is the way to go:
 First and foremost you need to connect to the cloud
 
 ```clojure
-(def c (connect "username" "password"))
+(def c (eh/connect "username" "password"))
 ```
 
 To get information about your account in the cloud
 
 ```clojure
-(user-account-info c)
+(def acc-info (eh/user-account-info c))
 ```
 
-The following should not require explanation
+List all the installations belonging to a user
 
 ```clojure
-(installations-by-user c your-user-id)
-(full-installation c your-installation-id)
-(get-system-status c your-system-id)
-(set-system-mode c your-system-id :dayoff)
-(def sched (get-zone-schedule c your-zone-id))
-(set-zone-schedule c your-zone-id your-new-schedule)
-(set-zone-temperature c your-zone-id 17.5)
-(cancel-zone-override c your-sone-id)
-(get-location-status c your-location-id)
+(def insts (eh/installations-by-user c (:user-id acc-info)))
 ```
+
+Get the installation at a specific location
+
+```clojure
+(def inst1 (installation-by-location c (get-in (first insts) [:location-info :location-id])))
+```
+
+Get a system status and change its mode
+
+```clojure
+(def system (-> inst1
+                :gateways
+                first
+                :temperature-control-systems
+                first))
+(get-system-status c (:system-id system))
+(set-system-mode c (:system-id system) :dayoff)
+```
+
+Get a specific zone's schedule
+
+```clojure
+(def zone (first (:zones system)))
+(def sched (get-zone-schedule c (:zone-id zone)))
+```
+
+Set a zone schedule
+
+```clojure
+(set-zone-schedule c (:zone-id zone) sched)
+```
+
+Override a zone temperature
+
+```clojure
+(set-zone-temperature c (:zone-id zone) 17.5)
+```
+
+Cancel a zone override
+
+```clojure
+(cancel-zone-override c (:zone-id zone))
+```
+
+Get a location status
+
+```clojure
+(get-location-status c (get-in inst1 [:location-info :location-id]))
+```
+
 
 ## License
 
