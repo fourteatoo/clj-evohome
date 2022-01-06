@@ -132,14 +132,22 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (comment
+  (def username "...")
+  (def password "...")
   (def c (connect username password))
-  (user-account-info c)
-  (installations-by-user c 2843271)
-  (full-installation c 3433565)
-  (get-system-status c 4679704)
-  (set-system-mode c 4679704 :dayoff)
-  (def sched (get-zone-schedule c 4679702))
-  (set-zone-schedule c 4679702 sched)
-  (set-zone-temperature c 4679702 17.5)
-  (cancel-zone-override c 4679702)
-  (get-location-status c 3433565))
+  (def acc-info (user-account-info c))
+  (def insts (installations-by-user c (:user-id acc-info)))
+  (def inst1 (installation-by-location c (get-in (first insts) [:location-info :location-id])))
+  (def system (-> inst1
+                  :gateways
+                  first
+                  :temperature-control-systems
+                  first))
+  (get-system-status c (:system-id system))
+  (set-system-mode c (:system-id system) :dayoff)
+  (def zone (first (:zones system)))
+  (def sched (get-zone-schedule c (:zone-id zone)))
+  (set-zone-schedule c (:zone-id zone) sched)
+  (set-zone-temperature c (:zone-id zone) 17.5)
+  (cancel-zone-override c (:zone-id zone))
+  (get-location-status c (get-in inst1 [:location-info :location-id])))
