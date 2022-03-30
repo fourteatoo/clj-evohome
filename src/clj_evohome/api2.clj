@@ -85,7 +85,7 @@
 
 (defn set-system-mode [connection system-id mode & {:keys [until]}]
   (api-call connection http-put (str "temperatureControlSystem/" system-id "/mode")
-            :form-params {:SystemMode (name mode)
+            :form-params {:SystemMode (csk/->camelCaseString mode)
                           :TimeUntil (when until (str until))
                           :Permanent (nil? until)}))
 
