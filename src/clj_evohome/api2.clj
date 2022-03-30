@@ -63,6 +63,7 @@
      :authorization (str token-type " " access-token)}))
 
 (defn api-call [connection op path & {:as opts}]
+  (assert connection)
   (:json (op (str api-url "/" path)
              (merge-http-opts {:headers (make-http-headers connection)}
                               opts))))
