@@ -1,4 +1,4 @@
-(ns clj-evohome.http
+(ns fourteatoo.clj-evohome.http
   (:require [clojure.string :as s]
             [clj-http.client :as http]
             clj-http.cookies

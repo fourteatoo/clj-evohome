@@ -1,4 +1,4 @@
-(ns clj-evohome.api1
+(ns fourteatoo.clj-evohome.api1
   (:require [clojure.string :as s]
             [clj-evohome.http :refer :all]
             [cheshire.core :as json]

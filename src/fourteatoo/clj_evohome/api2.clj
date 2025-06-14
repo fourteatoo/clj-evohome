@@ -1,4 +1,4 @@
-(ns clj-evohome.api2
+(ns fourteatoo.clj-evohome.api2
   (:require [clojure.string :as s]
             [clj-evohome.http :refer :all]
             [cheshire.core :as json]
@@ -174,6 +174,7 @@
                   first
                   :temperature-control-systems
                   first))
+  (select-zones c "Home sweet home" "Bedroom")
   (get-system-status c (:system-id system))
   (set-system-mode c (:system-id system) :dayoff)
   (def zone (first (:zones system)))
