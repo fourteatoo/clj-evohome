@@ -1,22 +1,22 @@
-(ns fourteatoo.clj-evohome.api2
+(ns fourteatoo.clj-evohome.api
+  "Interface to the current (v1) REST API."
   (:require [clojure.string :as s]
-            [clj-evohome.http :refer :all]
+            [fourteatoo.clj-evohome.http :as http]
             [cheshire.core :as json]
             [camel-snake-kebab.core :as csk]
             [java-time :as jt]))
 
 
-(def host-url "https://tccna.honeywell.com")
+(def ^:private host-url "https://tccna.honeywell.com")
 
-;; this would be for the new API
-(def api-url (str host-url "/WebAPI/emea/api/v1"))
+(def ^:private api-url (str host-url "/WebAPI/emea/api/v1"))
 
-(def auth-url (str host-url "/Auth/OAuth/Token"))
+(def ^:private auth-url (str host-url "/Auth/OAuth/Token"))
 
 (defn- get-auth-tokens [credentials]
-  (let [tokens (-> (http-post auth-url
-                              {:form-params credentials
-                               :headers {:authorization "Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg=="}})
+  (let [tokens (-> (http/http-post auth-url
+                                   {:form-params credentials
+                                    :headers {:authorization "Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg=="}})
                    :json)]
     (assoc tokens :expires (jt/plus (jt/local-date-time)
                                     (jt/seconds (:expires-in tokens))))))
@@ -62,37 +62,42 @@
     {:accept "application/json"
      :authorization (str token-type " " access-token)}))
 
-(defn api-call [connection op path & {:as opts}]
-  (assert connection)
-  (:json (op (str api-url "/" path)
-             (merge-http-opts {:headers (make-http-headers connection)}
-                              opts))))
+(defn- wrap-http [op]
+  (fn [connection path & {:as opts}]
+    (assert connection)
+    (:json (op (str api-url "/" path)
+               (http/merge-http-opts {:headers (make-http-headers connection)}
+                                     opts)))))
+
+(def ^:private http-get (wrap-http http/http-get))
+(def ^:private http-post (wrap-http http/http-post))
+(def ^:private http-put (wrap-http http/http-put))
 
 (defn user-account-info [connection]
-  (api-call connection http-get "userAccount"))
+  (http-get connection "userAccount"))
 
 (defn installations-by-user [connection user-id]
-  (api-call connection http-get "location/installationInfo"
+  (http-get connection "location/installationInfo"
             :query-params {:includeTemperatureControlSystems true
                            :userId user-id}))
 
 (defn installation-by-location [connection location]
-  (api-call connection http-get (str "location/" location "/installationInfo")
+  (http-get connection (str "location/" location "/installationInfo")
             :query-params {:includeTemperatureControlSystems true}))
 
 (defn get-system-status [connection system-id]
-  (api-call connection http-get (str "temperatureControlSystem/" system-id "/status")))
+  (http-get connection (str "temperatureControlSystem/" system-id "/status")))
 
 (defn set-system-mode [connection system-id mode & {:keys [until]}]
-  (api-call connection http-put (str "temperatureControlSystem/" system-id "/mode")
+  (http-put connection (str "temperatureControlSystem/" system-id "/mode")
             :form-params {:SystemMode (csk/->camelCaseString mode)
                           :TimeUntil (when until (str until))
                           :Permanent (nil? until)}))
 
 (defn- zone-heat-set-point [connection zone-type zone-id data]
-  (api-call connection http-put (str zone-type "/" zone-id "/heatSetPoint")
+  (http-put connection (str zone-type "/" zone-id "/heatSetPoint")
             :content-type "application/json"
-            :body (json/generate-string data {:key-fn csk/->camelCaseString})))
+            :body data))
 
 (defn set-zone-temperature [connection zone-id temperature & {:keys [until]}]
   (zone-heat-set-point connection "temperatureZone" zone-id
@@ -107,22 +112,22 @@
                        {:SetpointMode "FollowSchedule"}))
 
 (defn get-zone-schedule [connection zone-id]
-  (api-call connection http-get (str "temperatureZone/" zone-id "/schedule")))
+  (http-get connection (str "temperatureZone/" zone-id "/schedule")))
 
 (defn set-zone-schedule [connection zone-id schedule]
-  (api-call connection http-put (str "temperatureZone/" zone-id "/schedule")
+  (http-put connection (str "temperatureZone/" zone-id "/schedule")
             :content-type "application/json"
-            :body (json/generate-string schedule {:key-fn csk/->camelCaseString})))
+            :body schedule))
 
 (defn get-location-status [connection location-id]
-  (api-call connection http-get (str "location/" location-id "/status")
+  (http-get connection (str "location/" location-id "/status")
             :query-params {:includeTemperatureControlSystems true}))
 
 (defn get-domestic-hot-water [connection dhw-id]
-  (api-call connection http-get (str "domesticHotWater/" dhw-id "/status")))
+  (http-get connection (str "domesticHotWater/" dhw-id "/status")))
 
 (defn set-domsetic-hot-water [connection dhw-id state & {:keys [until]}]
-  (api-call connection http-put (str "domesticHotWater/" dhw-id "/status")
+  (http-put connection (str "domesticHotWater/" dhw-id "/status")
             :form-params {:Mode (cond (= state :auto) "FollowSchedule"
                                       until "TemporaryOverride"
                                       :else "PermanentOverride")
@@ -161,25 +166,3 @@
        (mapcat :temperature-control-systems)
        (map :system-id)
        (run! #(set-system-mode c % mode))))
-
-(comment
-  (def username "...")
-  (def password "...")
-  (def c (connect username password))
-  (def acc-info (user-account-info c))
-  (def insts (installations-by-user c (:user-id acc-info)))
-  (def inst1 (installation-by-location c (get-in (first insts) [:location-info :location-id])))
-  (def system (-> inst1
-                  :gateways
-                  first
-                  :temperature-control-systems
-                  first))
-  (select-zones c "Home sweet home" "Bedroom")
-  (get-system-status c (:system-id system))
-  (set-system-mode c (:system-id system) :dayoff)
-  (def zone (first (:zones system)))
-  (def sched (get-zone-schedule c (:zone-id zone)))
-  (set-zone-schedule c (:zone-id zone) sched)
-  (set-zone-temperature c (:zone-id zone) 17.5)
-  (cancel-zone-override c (:zone-id zone))
-  (get-location-status c (get-in inst1 [:location-info :location-id])))
