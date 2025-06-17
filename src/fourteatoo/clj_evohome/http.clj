@@ -38,15 +38,15 @@
       (-> (try
             (action (str url)
                     (merge {:cookie-store default-cookie-jar}
-                           opts))
+                           (update opts :body
+                                   (fn [body]
+                                     (if (map? body)
+                                       (json/generate-string body {:key-fn csk/->camelCaseString})
+                                       body)))))
             (catch Exception e
               (throw
                ;; augment exception with context
-               (ex-info "HTTP op exception"
-                        {:op action
-                         :url url
-                         :opts opts}
-                        e))))
+               (ex-info "HTTP op exception" {:op action :url url :opts opts} e))))
           add-url
           add-json))))
 
