@@ -1,14 +1,16 @@
 (ns fourteatoo.clj-evohome.http
+  "Various fairly low level HTTP primitives and wrappers of `clj-http`."
+  {:no-doc true}
   (:require [clojure.string :as s]
             [clj-http.client :as http]
             clj-http.cookies
             [cheshire.core :as json]
             [camel-snake-kebab.core :as csk]))
 
-(def make-cookie-store
+(def make-cookie-jar
   clj-http.cookies/cookie-store)
 
-(defonce default-cookie-jar (make-cookie-store))
+(defonce default-cookie-jar (make-cookie-jar))
 
 (defn- keywordify-map [m]
   (->> (map (juxt (comp keyword s/lower-case key) val) m)
