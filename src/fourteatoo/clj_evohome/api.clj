@@ -69,9 +69,9 @@
                (http/merge-http-opts {:headers (make-http-headers connection)}
                                      opts)))))
 
-(def ^:private http-get (wrap-http http/http-get))
-(def ^:private http-post (wrap-http http/http-post))
-(def ^:private http-put (wrap-http http/http-put))
+(def ^:private http-get (wrap-http #'http/http-get))
+(def ^:private http-post (wrap-http #'http/http-post))
+(def ^:private http-put (wrap-http #'http/http-put))
 
 (defn user-account-info [connection]
   (http-get connection "userAccount"))
