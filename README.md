@@ -1,3 +1,8 @@
+[![Clojars Project](https://img.shields.io/clojars/v/io.github.fourteatoo/clj-evohome.svg?include_prereleases)](https://clojars.org/io.github.fourteatoo/clj-evohome)
+[![cljdoc badge](https://cljdoc.org/badge/io.github.fourteatoo/clj-evohome)](https://cljdoc.org/d/io.github.fourteatoo/clj-evohome)
+
+
+
 # clj-evohome
 
 A Clojure library to query and configure a Honeywell EVO Home system
@@ -11,13 +16,13 @@ Require the library in your source code
 (require '[clj-evohome.api :as eh])
 ```
 
-First and foremost you need to connect to the cloud
+First you need to authenticate yourself with the server
 
 ```clojure
 (def c (eh/connect "username" "password"))
 ```
 
-To get information about your account
+Get information about your account
 
 ```clojure
 (def acc-info (eh/user-account-info c))
