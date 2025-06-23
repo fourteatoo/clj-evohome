@@ -76,22 +76,42 @@
 (def ^:private http-post (wrap-http #'http/http-post))
 (def ^:private http-put (wrap-http #'http/http-put))
 
-(defn user-account-info [connection]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn user-account-info
+  "Query the user account basic data, such as name, surname, address,
+  language, user ID, etc.  Return a map."
+  [connection]
   (http-get connection "userAccount"))
 
-(defn installations-by-user [connection user-id]
+(defn installations-by-user
+  "Given a user-id (see `user-account-info`), query each physical
+  installation belonging to that user.  The data returned for each
+  installation are name, type, adrress, gateways, etc.  Return a
+  sequence of maps."
+  [connection user-id]
   (http-get connection "location/installationInfo"
             :query-params {:includeTemperatureControlSystems true
                            :userId user-id}))
 
-(defn installation-by-location [connection location]
+(defn installation-by-location
+  "Given a location, query the physical installation belonging to that
+  location.  The data returned are name, type, adrress, gateways, etc.
+  Return a map.  See also `installations-by-user`"
+  [connection location]
   (http-get connection (str "location/" location "/installationInfo")
             :query-params {:includeTemperatureControlSystems true}))
 
-(defn get-system-status [connection system-id]
+(defn get-system-status
+  "Query a specific temperature control system.  A system is associated
+  to a gateway; they may be the same physical thing.  Return a map."
+  [connection system-id]
   (http-get connection (str "temperatureControlSystem/" system-id "/status")))
 
-(defn set-system-mode [connection system-id mode & {:keys [until]}]
+(defn set-system-mode
+  "Set the specific system to `mode`.  See also `list-system-modes`."
+  [connection system-id mode & {:keys [until]}]
   (http-put connection (str "temperatureControlSystem/" system-id "/mode")
             :form-params {:SystemMode (csk/->camelCaseString mode)
                           :TimeUntil (when until (str until))
@@ -114,15 +134,22 @@
   (zone-heat-set-point connection "temperatureZone" zone-id
                        {:SetpointMode "FollowSchedule"}))
 
-(defn get-zone-schedule [connection zone-id]
+(defn get-zone-schedule
+  "Return the daily schedule of zone with ID `zone-id`"
+  [connection zone-id]
   (http-get connection (str "temperatureZone/" zone-id "/schedule")))
 
-(defn set-zone-schedule [connection zone-id schedule]
+(defn set-zone-schedule
+  "Set the specified `zone-id` to have the daily plan `schedule`. See
+  `get-zone-schedule`."
+  [connection zone-id schedule]
   (http-put connection (str "temperatureZone/" zone-id "/schedule")
             :content-type "application/json"
             :body schedule))
 
-(defn get-location-status [connection location-id]
+(defn get-location-status
+  "Get the status of all zones in the specified location `location-id`."
+  [connection location-id]
   (http-get connection (str "location/" location-id "/status")
             :query-params {:includeTemperatureControlSystems true}))
 
