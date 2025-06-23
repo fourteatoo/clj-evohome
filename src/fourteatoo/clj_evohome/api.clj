@@ -54,11 +54,11 @@
       :tokens
       deref))
 
+(defrecord EvoClient [username password tokens])
+
 (defn connect [username password]
   (let [tokens (basic-login username password)]
-    {:tokens (atom tokens)
-     :username username
-     :password password}))
+    (->EvoClient username password (atom tokens))))
 
 (defn- make-http-headers [connection]
   (let [{:keys [access-token token-type]} (auth-tokens connection)]
