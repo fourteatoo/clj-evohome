@@ -78,6 +78,24 @@ Get a location status
 (get-location-status c (get-in inst1 [:location-info :location-id]))
 ```
 
+## Documentation
+
+You can have a look at [![cljdoc](https://cljdoc.org/badge/io.github.fourteatoo/clj-evohome)](https://cljdoc.org/d/io.github.fourteatoo/clj-evohome)
+
+or you can create your own local documentation with:
+
+```shell
+$ lein codox
+```
+
+and then read it with your favorite browser
+
+```shell
+$ firefox target/doc/index.html
+```
+
+
+
 
 ## License
 
