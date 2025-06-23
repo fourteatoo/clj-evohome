@@ -5,11 +5,10 @@ A Clojure library to query and configure a Honeywell EVO Home system
 
 ## Usage
 
-Require the library in your source code. The API2 is probably what you
-want to use:
+Require the library in your source code
 
 ```clojure
-(require '[clj-evohome.api2 :as eh])
+(require '[clj-evohome.api :as eh])
 ```
 
 First and foremost you need to connect to the cloud
