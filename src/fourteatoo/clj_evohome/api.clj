@@ -163,36 +163,3 @@
                                       :else "PermanentOverride")
                           :State (when (not= :auto state) (name state))
                           :UntilTime (when until (str until))}))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn select-locations [c location-name]
-  (->> (user-account-info c)
-       :user-id
-       (installations-by-user c)
-       (filter #(= location-name (get-in % [:location-info :name])))))
-
-(defn select-zones [c location zone]
-  (->> (select-locations c location)
-       (mapcat :gateways)
-       (mapcat :temperature-control-systems)
-       (mapcat :zones)
-       (filter #(= zone (:name %)))))
-
-(defn set-temperature [c location zone temperature & {:keys [until]}]
-  (->> (select-zones c location zone)
-       (map :zone-id)
-       (run! #(set-zone-temperature c % temperature :until until))))
-
-(defn cancel-override [c location zone]
-  (->> (select-zones c location zone)
-       (map :zone-id)
-       (run! (partial cancel-zone-override c))))
-
-(defn set-mode [c location mode]
-  (->> (select-locations c location)
-       (mapcat :gateways)
-       (mapcat :temperature-control-systems)
-       (map :system-id)
-       (run! #(set-system-mode c % mode))))
