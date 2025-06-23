@@ -13,10 +13,13 @@
 
 (def ^:private auth-url (str host-url "/Auth/OAuth/Token"))
 
+(def ^:private authorization-token
+  "NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==")
+
 (defn- get-auth-tokens [credentials]
   (let [tokens (-> (http/http-post auth-url
                                    {:form-params credentials
-                                    :headers {:authorization "Basic NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg=="}})
+                                    :headers {:authorization (str "Basic " authorization-token)}})
                    :json)]
     (assoc tokens :expires (jt/plus (jt/local-date-time)
                                     (jt/seconds (:expires-in tokens))))))
