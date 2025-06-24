@@ -19,7 +19,7 @@ Require the library in your source code
 First you need to authenticate yourself with the server
 
 ```clojure
-(def c (eh/connect "username" "password"))
+(def c (eh/authenticate-client "username" "password"))
 ```
 
 Get information about your account

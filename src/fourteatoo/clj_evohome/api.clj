@@ -35,41 +35,41 @@
                     :scope (:scope tokens)
                     :refresh_token (:refresh-token tokens)}))
 
-(def connect)
+(def authenticate-client)
 
-(defn- ensure-fresh-connection [connection]
-  (when (jt/before? (jt/plus (jt/local-date-time)
-                             (jt/seconds 15))
-                    (-> connection :tokens deref :expires))
+(defn- ensure-fresh-client [client]
+  (when (jt/before? (-> client :tokens deref :expires)
+                    (jt/plus (jt/local-date-time)
+                             (jt/seconds 15)))
     (try
-      (swap! (:tokens connection) refresh-tokens)
-      connection
+      (swap! (:tokens client) refresh-tokens)
+      client
       (catch Exception e
-        (connect (:username connection)
-                 (:password connection)))))
-  connection)
+        (authenticate-client (:username client)
+                             (:password client)))))
+  client)
 
-(defn- auth-tokens [connection]
-  (-> (ensure-fresh-connection connection)
+(defn- auth-tokens [client]
+  (-> (ensure-fresh-client client)
       :tokens
       deref))
 
 (defrecord EvoClient [username password tokens])
 
-(defn connect [username password]
+(defn authenticate-client [username password]
   (let [tokens (basic-login username password)]
     (->EvoClient username password (atom tokens))))
 
-(defn- make-http-headers [connection]
-  (let [{:keys [access-token token-type]} (auth-tokens connection)]
+(defn- make-http-headers [client]
+  (let [{:keys [access-token token-type]} (auth-tokens client)]
     {:accept "application/json"
      :authorization (str token-type " " access-token)}))
 
 (defn- wrap-http [op]
-  (fn [connection path & {:as opts}]
-    (assert connection)
+  (fn [client path & {:as opts}]
+    {:pre [(instance? EvoClient client)]}
     (:json (op (str api-url "/" path)
-               (http/merge-http-opts {:headers (make-http-headers connection)}
+               (http/merge-http-opts {:headers (make-http-headers client)}
                                      opts)))))
 
 (def ^:private http-get (wrap-http #'http/http-get))
@@ -82,82 +82,82 @@
 (defn user-account-info
   "Query the user account basic data, such as name, surname, address,
   language, user ID, etc.  Return a map."
-  [connection]
-  (http-get connection "userAccount"))
+  [client]
+  (http-get client "userAccount"))
 
 (defn installations-by-user
   "Given a user-id (see `user-account-info`), query each physical
   installation belonging to that user.  The data returned for each
   installation are name, type, adrress, gateways, etc.  Return a
   sequence of maps."
-  [connection user-id]
-  (http-get connection "location/installationInfo"
+  [client user-id]
+  (http-get client "location/installationInfo"
             :query-params {:includeTemperatureControlSystems true
                            :userId user-id}))
 
-(defn installation-by-location
+(defn installation-at-location
   "Given a location, query the physical installation belonging to that
   location.  The data returned are name, type, adrress, gateways, etc.
   Return a map.  See also `installations-by-user`"
-  [connection location]
-  (http-get connection (str "location/" location "/installationInfo")
+  [client location]
+  (http-get client (str "location/" location "/installationInfo")
             :query-params {:includeTemperatureControlSystems true}))
 
 (defn get-system-status
   "Query a specific temperature control system.  A system is associated
   to a gateway; they may be the same physical thing.  Return a map."
-  [connection system-id]
-  (http-get connection (str "temperatureControlSystem/" system-id "/status")))
+  [client system-id]
+  (http-get client (str "temperatureControlSystem/" system-id "/status")))
 
 (defn set-system-mode
   "Set the specific system to `mode`.  See also `list-system-modes`."
-  [connection system-id mode & {:keys [until]}]
-  (http-put connection (str "temperatureControlSystem/" system-id "/mode")
+  [client system-id mode & {:keys [until]}]
+  (http-put client (str "temperatureControlSystem/" system-id "/mode")
             :form-params {:SystemMode (csk/->camelCaseString mode)
                           :TimeUntil (when until (str until))
                           :Permanent (nil? until)}))
 
-(defn- zone-heat-set-point [connection zone-type zone-id data]
-  (http-put connection (str zone-type "/" zone-id "/heatSetPoint")
+(defn- zone-heat-set-point [client zone-type zone-id data]
+  (http-put client (str zone-type "/" zone-id "/heatSetPoint")
             :content-type "application/json"
             :body data))
 
-(defn set-zone-temperature [connection zone-id temperature & {:keys [until]}]
-  (zone-heat-set-point connection "temperatureZone" zone-id
+(defn set-zone-temperature [client zone-id temperature & {:keys [until]}]
+  (zone-heat-set-point client "temperatureZone" zone-id
                        {:SetpointMode (if until
                                         "TemporaryOverride"
                                         "PermanentOverride")
                         :HeatSetpointValue temperature
                         :TimeUntil (when until (str until))}))
 
-(defn cancel-zone-override [connection zone-id]
-  (zone-heat-set-point connection "temperatureZone" zone-id
+(defn cancel-zone-override [client zone-id]
+  (zone-heat-set-point client "temperatureZone" zone-id
                        {:SetpointMode "FollowSchedule"}))
 
 (defn get-zone-schedule
   "Return the daily schedule of zone with ID `zone-id`"
-  [connection zone-id]
-  (http-get connection (str "temperatureZone/" zone-id "/schedule")))
+  [client zone-id]
+  (http-get client (str "temperatureZone/" zone-id "/schedule")))
 
 (defn set-zone-schedule
   "Set the specified `zone-id` to have the daily plan `schedule`. See
   `get-zone-schedule`."
-  [connection zone-id schedule]
-  (http-put connection (str "temperatureZone/" zone-id "/schedule")
+  [client zone-id schedule]
+  (http-put client (str "temperatureZone/" zone-id "/schedule")
             :content-type "application/json"
             :body schedule))
 
 (defn get-location-status
   "Get the status of all zones in the specified location `location-id`."
-  [connection location-id]
-  (http-get connection (str "location/" location-id "/status")
+  [client location-id]
+  (http-get client (str "location/" location-id "/status")
             :query-params {:includeTemperatureControlSystems true}))
 
-(defn get-domestic-hot-water [connection dhw-id]
-  (http-get connection (str "domesticHotWater/" dhw-id "/status")))
+(defn get-domestic-hot-water [client dhw-id]
+  (http-get client (str "domesticHotWater/" dhw-id "/status")))
 
-(defn set-domsetic-hot-water [connection dhw-id state & {:keys [until]}]
-  (http-put connection (str "domesticHotWater/" dhw-id "/status")
+(defn set-domsetic-hot-water [client dhw-id state & {:keys [until]}]
+  (http-put client (str "domesticHotWater/" dhw-id "/status")
             :form-params {:Mode (cond (= state :auto) "FollowSchedule"
                                       until "TemporaryOverride"
                                       :else "PermanentOverride")
