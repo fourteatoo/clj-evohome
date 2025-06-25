@@ -8,5 +8,7 @@
                  [clj-http "3.13.0"]
                  [cheshire "6.0.0"]
                  [camel-snake-kebab "0.4.3"]]
-  :profiles {:dev {:plugins [[lein-codox "0.10.8"]]}}
-  :repl-options {:init-ns fourteatoo.clj-evohome.api})
+  :profiles {:dev {:plugins [[lein-codox "0.10.8"]
+                             [lein-cloverage "1.2.4"]]}}
+  :repl-options {:init-ns fourteatoo.clj-evohome.api}
+  :lein-release {:deploy-via :clojars})
