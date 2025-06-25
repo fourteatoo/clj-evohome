@@ -9,7 +9,7 @@
 A Clojure library to query and configure Honeywell EVO Home (aka TCC)
 installations.
 
-The library interact with the REST API of the cloud service.  Those
+The library interacts with the REST API of the cloud service.  Those
 servers do the actual talking with your Honeywell devices.  That is,
 you need an internet connection.
 
