@@ -1,5 +1,6 @@
 (ns fourteatoo.clj-evohome.legacy.api
   "Interface to the legacy REST API."
+  {:no-doc true}
   (:require [clojure.string :as s]
             [fourteatoo.clj-evohome.http :as http]
             [cheshire.core :as json]
