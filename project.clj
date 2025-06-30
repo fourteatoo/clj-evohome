@@ -1,4 +1,4 @@
-(defproject io.github.fourteatoo/clj-evohome "0.1.2-SNAPSHOT"
+(defproject io.github.fourteatoo/clj-evohome "1.0.0-SNAPSHOT"
   :description "A simple Clojure interface to Honeywell EVO Home"
   :url "http://github.com/fourteatoo/clj-evohome"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -7,7 +7,8 @@
                  [clojure.java-time "1.4.3"]
                  [clj-http "3.13.0"]
                  [cheshire "6.0.0"]
-                 [camel-snake-kebab "0.4.3"]]
+                 [camel-snake-kebab "0.4.3"]
+                 [org.clojure/core.memoize "1.1.266"]]
   :profiles {:dev {:plugins [[lein-codox "0.10.8"]
                              [lein-cloverage "1.2.4"]]}}
   :repl-options {:init-ns fourteatoo.clj-evohome.api}
