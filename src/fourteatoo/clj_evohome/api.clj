@@ -183,7 +183,7 @@
   {:pre [(instance? EvoClient client)]}
   (http-get client (str "domesticHotWater/" dhw-id "/status")))
 
-(defn set-domsetic-hot-water
+(defn set-domestic-hot-water
   "Set the state of the domestic hot water.  Set it permanently if
   `until` is not specified.  If `state` is `:auto` the normal schedule
   is resumed, thus cancelling any previous setting."
