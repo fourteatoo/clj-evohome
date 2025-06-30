@@ -123,10 +123,10 @@
     (check-auth-token response)
     (assert-empty-body response)))
 
-(deftest set-domsetic-hot-water
+(deftest set-domestic-hot-water
   (let [dhw (rand-int 1000)
-        state (rand-nth ["foo" "bar"])
-        response (api/set-domsetic-hot-water dummy-client dhw state)]
+        state (rand-nth [:on :off :dunno])
+        response (api/set-domestic-hot-water dummy-client dhw state)]
     (is (= (str "https://tccna.honeywell.com/WebAPI/emea/api/v1/domesticHotWater/" dhw "/status")
            (:url response)))
     (check-auth-token response)
