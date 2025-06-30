@@ -5,6 +5,10 @@
 # https://circleci.com/docs/language-clojure/ for more details
 version: 2.1
 
+orbs:
+  coveralls: coveralls/coveralls@2.2.5
+  codecov: codecov/codecov@5
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
@@ -49,7 +53,10 @@ jobs:
       # run tests!
       - run: lein test
 
-      - run: lein cloverage --junit --codecov
+      - run: lein cloverage --junit --codecov --coveralls
+
+      - coveralls/upload:
+          coverage_file: target/coverage/coveralls.json
 
       - store_test_results:
           path: target/coverage
