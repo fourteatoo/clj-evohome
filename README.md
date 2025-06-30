@@ -1,6 +1,7 @@
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.fourteatoo/clj-evohome.svg?include_prereleases)](https://clojars.org/io.github.fourteatoo/clj-evohome)
 [![cljdoc badge](https://cljdoc.org/badge/io.github.fourteatoo/clj-evohome)](https://cljdoc.org/d/io.github.fourteatoo/clj-evohome)
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/fourteatoo/clj-evohome/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/fourteatoo/clj-evohome/tree/main)
+[![Coverage Status](https://coveralls.io/repos/github/fourteatoo/clj-evohome/badge.svg)](https://coveralls.io/github/fourteatoo/clj-evohome)
 
 
 
