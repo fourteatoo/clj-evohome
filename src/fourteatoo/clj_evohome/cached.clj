@@ -47,7 +47,7 @@
           {} installations))
 
 (defn- get-metadata [c]
-  (let [user (user-account c)
+  (let [user (get-user-account c)
         installations (get-installations c (:user-id user) :tcs true)
         system-modes (list-system-modes installations)
         locations (index-locations installations)
