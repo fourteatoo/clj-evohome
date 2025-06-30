@@ -107,7 +107,29 @@ and then read it with your favorite browser
 $ firefox target/doc/index.html
 ```
 
+## Object tree
 
+The topology of the EVO Home system sees the user as the owner of
+different locations (installations).  To a location belong one or more
+gateways.  To a gateway belong one or more temperature control
+systems.  Each temperature control system has a number of zones; the
+actuators and sensors.  Physically, if you bought an EvoTouch panel,
+the temperature control system is also the gateway.
+
+A single apartment installation may have just one location, one
+gateway, one temperature control system (which is the gateway too) and
+several zones (one for each room).
+
+All these components have a globally unique ID.  That is, all the API
+primitives require just the zone, location, or system ID, to uniquely
+identify your device/area.  The locations and the zones have a name,
+too, that can be assigned by the user.  The locations will have names
+like "Home" or "Office", while zones will have names like "Kitchen",
+"Bedroom", "Kids", "Livingroom", etc.
+
+The low-level API requires you to use the IDs, while there is an
+higher-level layer that allows you to use name paths, to identify your
+devices.  That is `["Home" "Kitchen"]` rather than `"162534"`.
 
 
 ## License
