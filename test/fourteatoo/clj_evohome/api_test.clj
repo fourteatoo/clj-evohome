@@ -18,7 +18,7 @@
 (comment
   (type dummy-client)
   (mock/call-with-mocks (fn []
-                          (api/user-account-info dummy-client))))
+                          (api/get-user-account dummy-client))))
 
 (use-fixtures :once mock/call-with-mocks)
 
@@ -33,24 +33,24 @@
 (defn check-body [expected response]
   (is (= expected (get-in response [:opts :body]))))
 
-(deftest user-account-info
-  (let [response (api/user-account-info dummy-client)]
+(deftest get-user-account
+  (let [response (api/get-user-account dummy-client)]
     (is (= "https://tccna.honeywell.com/WebAPI/emea/api/v1/userAccount"
            (:url response)))
     (check-auth-token response)
     (assert-empty-body response)))
 
-(deftest installations-by-user
+(deftest get-installations
   (let [user (rand-int 1000)
-        response (api/installations-by-user dummy-client user)]
+        response (api/get-installations dummy-client user)]
     (is (= (str "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo")
            (:url response)))
     (check-auth-token response)
     (assert-empty-body response)))
 
-(deftest installation-at-location
+(deftest get-installation-at-location
   (let [location (rand-int 1000)
-        response (api/installation-at-location dummy-client location)]
+        response (api/get-installation-at-location dummy-client location)]
     (is (= (str "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/" location "/installationInfo")
            (:url response)))
     (check-auth-token response)
