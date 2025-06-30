@@ -32,19 +32,19 @@ First you need to authenticate yourself with the server
 Get information about your account
 
 ```clojure
-(def acc-info (eh/user-account-info c))
+(def acc-info (eh/get-user-account c))
 ```
 
 List all the installations belonging to a user
 
 ```clojure
-(def insts (eh/installations-by-user c (:user-id acc-info)))
+(def insts (eh/get-installations c (:user-id acc-info)))
 ```
 
 Get the installation at a specific location
 
 ```clojure
-(def inst1 (installation-by-location c (get-in (first insts) [:location-info :location-id])))
+(def inst1 (eh/get-installation-at-location c (get-in (first insts) [:location-info :location-id])))
 ```
 
 Get a system status and change its mode
@@ -55,40 +55,41 @@ Get a system status and change its mode
                 first
                 :temperature-control-systems
                 first))
-(get-system-status c (:system-id system))
-(set-system-mode c (:system-id system) :dayoff)
+(eh/get-system-status c (:system-id system))
+(eh/set-system-mode c (:system-id system) :day-off)
 ```
 
 Get a specific zone's schedule
 
 ```clojure
 (def zone (first (:zones system)))
-(def sched (get-zone-schedule c (:zone-id zone)))
+(def sched (eh/get-zone-schedule c (:zone-id zone)))
 ```
 
 Set a zone schedule
 
 ```clojure
-(set-zone-schedule c (:zone-id zone) sched)
+(eh/set-zone-schedule c (:zone-id zone) sched)
 ```
 
 Override a zone temperature
 
 ```clojure
-(set-zone-temperature c (:zone-id zone) 17.5)
+(eh/set-zone-temperature c (:zone-id zone) 17.5)
 ```
 
 Cancel a zone override
 
 ```clojure
-(cancel-zone-override c (:zone-id zone))
+(eh/cancel-zone-override c (:zone-id zone))
 ```
 
 Get a location status
 
 ```clojure
-(get-location-status c (get-in inst1 [:location-info :location-id]))
+(eh/get-location-status c (get-in inst1 [:location-info :location-id]))
 ```
+
 
 ## Documentation
 
