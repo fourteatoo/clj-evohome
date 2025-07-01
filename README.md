@@ -15,36 +15,51 @@ servers do the actual talking with your Honeywell devices.  That is,
 you need an internet connection.
 
 
+There are two main components of the library; the low-level namespace
+`fourteatoo.clj-evohome.api` which just wraps the REST API.  And the
+higher-level namespace `fourteatoo.clj-evohome.cached` which provides
+a friendlier interface to the API.
+
+
 ## Usage
 
-Require the library in your source code
+Require the library in your source code:
 
 ```clojure
-(require '[clj-evohome.api :as eh])
+(require '[fourteatoo.clj-evohome.api :as api])
 ```
 
-First you need to authenticate yourself with the server
+Additionally you may want to require the higher-level interface
 
 ```clojure
-(def c (eh/authenticate-client "username" "password"))
+(require '[fourteatoo.clj-evohome.cached :as capi])
+```
+
+
+### Basic functionality
+
+In your code, first you need to authenticate yourself with the server
+
+```clojure
+(def c (api/authenticate-client "username" "password"))
 ```
 
 Get information about your account
 
 ```clojure
-(def acc-info (eh/get-user-account c))
+(def acc-info (api/get-user-account c))
 ```
 
 List all the installations belonging to a user
 
 ```clojure
-(def insts (eh/get-installations c (:user-id acc-info)))
+(def insts (api/get-installations c (:user-id acc-info)))
 ```
 
 Get the installation at a specific location
 
 ```clojure
-(def inst1 (eh/get-installation-at-location c (get-in (first insts) [:location-info :location-id])))
+(def inst1 (api/get-installation-at-location c (get-in (first insts) [:location-info :location-id])))
 ```
 
 Get a system status and change its mode
@@ -55,40 +70,48 @@ Get a system status and change its mode
                 first
                 :temperature-control-systems
                 first))
-(eh/get-system-status c (:system-id system))
-(eh/set-system-mode c (:system-id system) :day-off)
+(api/get-system-status c (:system-id system))
+(api/set-system-mode c (:system-id system) :day-off)
 ```
 
 Get a specific zone's schedule
 
 ```clojure
 (def zone (first (:zones system)))
-(def sched (eh/get-zone-schedule c (:zone-id zone)))
+(def sched (api/get-zone-schedule c (:zone-id zone)))
 ```
 
 Set a zone schedule
 
 ```clojure
-(eh/set-zone-schedule c (:zone-id zone) sched)
+(api/set-zone-schedule c (:zone-id zone) sched)
 ```
 
 Override a zone temperature
 
 ```clojure
-(eh/set-zone-temperature c (:zone-id zone) 17.5)
+(api/set-zone-temperature c (:zone-id zone) 17.5)
 ```
 
 Cancel a zone override
 
 ```clojure
-(eh/cancel-zone-override c (:zone-id zone))
+(api/cancel-zone-override c (:zone-id zone))
 ```
 
 Get a location status
 
 ```clojure
-(eh/get-location-status c (get-in inst1 [:location-info :location-id]))
+(api/get-location-status c (get-in inst1 [:location-info :location-id]))
 ```
+
+### Higher abstraction
+
+In the namespace `fourteatoo.clj-evohome.cached` there is a thin layer
+atop the basic `fourteatoo.clj-evohome.api`.  It simplifies aspects
+like addressing your objects by path, rather than ID.  The names
+asssigned by the user are the path components.
+
 
 
 ## Documentation
