@@ -17,7 +17,7 @@ you need an internet connection.
 
 There are two main components of the library; the low-level namespace
 `fourteatoo.clj-evohome.api` which just wraps the REST API.  And the
-higher-level namespace `fourteatoo.clj-evohome.cached` which provides
+higher-level namespace `fourteatoo.clj-evohome.core` which provides
 a friendlier interface to the API.
 
 
@@ -32,11 +32,11 @@ Require the library in your source code:
 Additionally you may want to require the higher-level interface
 
 ```clojure
-(require '[fourteatoo.clj-evohome.cached :as capi])
+(require '[fourteatoo.clj-evohome.core :as capi])
 ```
 
 
-### Basic functionality
+### Basic functionality (the `api` namespace)
 
 In your code, first you need to authenticate yourself with the server
 
@@ -105,12 +105,22 @@ Get a location status
 (api/get-location-status c (get-in inst1 [:location-info :location-id]))
 ```
 
-### Higher abstraction
+### Friendlier abstraction (the `core` namespace)
 
-In the namespace `fourteatoo.clj-evohome.cached` there is a thin layer
+Although the `fourteatoo.clj-evohome.api` namespace provides the
+essential functionality of the REST API, beside the authentication
+mechanism, not much is provided in terms of abstraction.
+
+In the namespace `fourteatoo.clj-evohome.core` there is a thin layer
 atop the basic `fourteatoo.clj-evohome.api`.  It simplifies aspects
 like addressing your objects by path, rather than ID.  The names
-asssigned by the user are the path components.
+asssigned by the user become identifiers.  Locations can be identified
+with strings like "Home" or "Shop" and zones can be addressed by their
+path, like ["Home" "Bedroom"] or ["Shop" "Toilet"].  Internally a copy
+of the installation is cached, to reduce the amount of queries.  That
+means, there will be a delay between, say, the installation of a new
+thermostat and its appearence in you application.  Unless that's
+something you do frequently, it hardly matters.
 
 
 
