@@ -128,8 +128,8 @@
                           :TimeUntil (when until (str until))
                           :Permanent (nil? until)}))
 
-(defn- zone-heat-set-point [client zone-type zone-id data]
-  (http-put client (str zone-type "/" zone-id "/heatSetPoint")
+(defn- zone-heat-set-point [client zone-id data]
+  (http-put client (str "temperatureZone/" zone-id "/heatSetPoint")
             :content-type "application/json"
             :body data))
 
@@ -138,7 +138,7 @@
   is not specified."
   [client zone-id temperature & {:keys [until]}]
   {:pre [(instance? ApiClient client)]}
-  (zone-heat-set-point client "temperatureZone" zone-id
+  (zone-heat-set-point client zone-id
                        {:SetpointMode (if until
                                         "TemporaryOverride"
                                         "PermanentOverride")
@@ -150,8 +150,10 @@
   This will effectively resume the normal schedule."
   [client zone-id]
   {:pre [(instance? ApiClient client)]}
-  (zone-heat-set-point client "temperatureZone" zone-id
-                       {:SetpointMode "FollowSchedule"}))
+  (zone-heat-set-point client zone-id
+                       {:SetpointMode "FollowSchedule"
+                        :HeatSetpointValue 0
+                        :TimeUntil nil}))
 
 (defn get-zone-schedule
   "Return the daily schedule of zone with ID `zone-id`"
