@@ -40,7 +40,7 @@
     (check-auth-token response)
     (assert-empty-body response)))
 
-(deftest get-installations
+(deftest get-installation
   (let [user (rand-int 1000)
         response (api/get-installation dummy-client user)]
     (is (= (str "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/installationInfo")
@@ -48,7 +48,7 @@
     (check-auth-token response)
     (assert-empty-body response)))
 
-(deftest get-installation-at-location
+(deftest get-location
   (let [location (rand-int 1000)
         response (api/get-location dummy-client location)]
     (is (= (str "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/" location "/installationInfo")
