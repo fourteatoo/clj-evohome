@@ -110,7 +110,7 @@
 
 (defn get-system-status
   "Query a specific temperature control system.  A system is associated
-  to a gateway; they may be the same physical thing.  Return a map."
+  to a gateway and they may be the same physical thing.  Return a map."
   [client system-id]
   {:pre [(instance? EvoClient client)]}
   (http-get client (str "temperatureControlSystem/" system-id "/status")))
@@ -146,7 +146,7 @@
                         :TimeUntil (when until (str until))}))
 
 (defn cancel-zone-override
-  "Cancel a `set-zone-temperature`.
+  "Cancel a previous `set-zone-temperature`.
   This will effectively resume the normal schedule."
   [client zone-id]
   {:pre [(instance? EvoClient client)]}
@@ -169,9 +169,9 @@
             :body schedule))
 
 (defn get-location-status
-  "Get the status of all zones in the specified location
-  `location-id`. If `tcs?` is true include the temperature control
-  systems."
+  "Get the status of the specified location `location-id`. If `tcs?` is
+  true include the temperature control systems within and their
+  relative zones."
   [client location-id & {:keys [tcs?]}]
   {:pre [(instance? EvoClient client)]}
   (http-get client (str "location/" location-id "/status")
