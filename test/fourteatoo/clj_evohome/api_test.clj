@@ -89,7 +89,7 @@
     (is (= (str "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/" zone "/heatSetPoint")
            (:url response)))
     (check-auth-token response)
-    (check-body "{\"setpointMode\":\"FollowSchedule\"}"
+    (check-body "{\"setpointMode\":\"FollowSchedule\",\"heatSetpointValue\":0,\"timeUntil\":null}"
                 response)))
 
 (deftest get-zone-schedule
