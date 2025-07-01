@@ -52,9 +52,10 @@
                                        (json/generate-string body {:key-fn csk/->camelCaseString})
                                        body)))))
             (catch Exception e
-              (let [json (ignore-errors
-                           (json/parse-string (:body (ex-data e))
-                                              csk/->kebab-case-keyword))]
+              (let [json (or (ignore-errors
+                               (json/parse-string (:body (ex-data e))
+                                                  csk/->kebab-case-keyword))
+                             (:body (ex-data e)))]
                 (throw
                  (ex-info "HTTP op exception"
                           {:op action
