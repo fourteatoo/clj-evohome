@@ -122,6 +122,37 @@ means, there will be a delay between, say, the installation of a new
 thermostat and its appearence in you application.  Unless that's
 something you do frequently, it hardly matters.
 
+First you need to authenticate
+
+```clojure
+(def c (capi/authenticate-client "username" "password"))
+```
+
+It will return a slightly different ApiClient which needs to be used
+in the following calls.
+
+```clojure
+(def insts (capi/get-installation c))
+```
+
+```clojure
+(def loc (capi/get-location c "Home"))
+```
+
+```clojure
+(def sched (capi/get-zone-schedule c ["Home" "Kitchen"]))
+```
+
+```clojure
+(capi/set-zone-temperature c ["Home" "Bedroom"] 17.5)
+```
+
+```clojure
+(capi/get-location-status c "Home")
+```
+
+... and so on.
+
 
 
 ## Documentation
