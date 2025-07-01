@@ -30,6 +30,9 @@
       (boolean (re-find #"json" ct))
       false)))
 
+(defmacro ignore-errors [& body]
+  `(try (do ~@body) (catch Exception _# nil)))
+
 (defn- restify [action]
   (fn [url & [opts]]
     (let [add-url #(assoc % :url url)
@@ -49,9 +52,15 @@
                                        (json/generate-string body {:key-fn csk/->camelCaseString})
                                        body)))))
             (catch Exception e
-              (throw
-               ;; augment exception with context
-               (ex-info "HTTP op exception" {:op action :url url :opts opts} e))))
+              (let [json (ignore-errors
+                           (json/parse-string (:body (ex-data e))
+                                              csk/->kebab-case-keyword))]
+                (throw
+                 (ex-info "HTTP op exception"
+                          {:op action
+                           :url url
+                           :opts opts
+                           :errors json} e)))))
           add-url
           add-json))))
 
