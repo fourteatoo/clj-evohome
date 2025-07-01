@@ -152,7 +152,17 @@ like "Home" or "Office", while zones will have names like "Kitchen",
 
 The low-level API requires you to use the IDs, while there is an
 higher-level layer that allows you to use name paths, to identify your
-devices.  That is `["Home" "Kitchen"]` rather than `"162534"`.
+devices.  That is `["Home" "Kitchen"]` rather than the zone ID
+`"162534"`.
+
+Temperature control systems have user-defined modes.  Those are always
+referenced by name; names such as `:day-off`, `:away`, `:auto`, etc.
+The function `api/set-system-mode` works on a specific control system,
+not on the entire location it belongs to.  The function
+`capi/set-location-mode` applies the mode to all the systems belonging
+to the same location, provided the mode is supported by all the
+systems within.
+
 
 
 ## License
