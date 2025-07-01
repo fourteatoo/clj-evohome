@@ -86,23 +86,23 @@
   {:pre [(instance? EvoClient client)]}
   (http-get client "userAccount"))
 
-(defn get-installations
-  "Given a user ID (see `get-user-account`), query each physical
-  installation belonging to the user.  The data returned for each
-  installation are name, type, adrress, gateways, etc.  If `tcs?` is
-  true include the temperature control systems. Return a sequence of
-  maps."
+(defn get-installation
+  "Given a user ID (see `get-user-account`), query the installation
+  belonging to the user.  An installation is a collection of
+  locations.  The data returned for each location are name, type,
+  adrress, gateways, etc.  If `tcs?` is true, include the temperature
+  control systems.  Return a sequence of maps."
   [client user-id & {:keys [tcs?]}]
   {:pre [(instance? EvoClient client)]}
   (http-get client "location/installationInfo"
             :query-params {:includeTemperatureControlSystems (boolean tcs?)
                            :userId user-id}))
 
-(defn get-installation-at-location
-  "Given a location ID, query the physical installation belonging to
-  that location.  The data returned are name, type, adrress, gateways,
-  etc.  If `tcs?` is true include the temperature control systems.
-  Return a map.  See also `installations-by-user`."
+(defn get-location
+  "Given a location ID, query the object tree belonging to that
+  location.  The data returned are name, type, adrress, gateways, etc.
+  If `tcs?` is true, include the temperature control systems.  Return
+  a map.  See also `get-installation`."
   [client location & {:keys [tcs?]}]
   {:pre [(instance? EvoClient client)]}
   (http-get client (str "location/" location "/installationInfo")

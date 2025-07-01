@@ -109,14 +109,14 @@ $ firefox target/doc/index.html
 
 ## Object tree
 
-The topology of the EVO Home system sees the user as the owner of
-different locations (installations).  To a location belong one or more
-gateways.  To a gateway belong one or more temperature control
-systems.  Each temperature control system has a number of zones; the
-actuators and sensors.  Physically, if you bought an EvoTouch panel,
-the temperature control system is also the gateway.
+The topology of the EVO Home system sees the user as the owner of an
+installation.  The installation is a collection of locations.  To a
+location belong one or more gateways.  To a gateway belong one or more
+temperature control systems.  Each temperature control system has a
+number of zones; the actuators and sensors.  Physically, if you bought
+an EvoTouch panel, the temperature control system is also the gateway.
 
-A single apartment installation may have just one location, one
+A single apartment installation has typically just one location, one
 gateway, one temperature control system (which is the gateway too) and
 several zones (one for each room).
 
