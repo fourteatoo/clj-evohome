@@ -46,7 +46,7 @@
 (defn- *nix-time []
   (System/currentTimeMillis))
 
-(defn cached
+(defn- cached
   "Cache `f`'s return value for `millis` milliseconds.  `f` must be a
   function without arguments."
   [f millis]
