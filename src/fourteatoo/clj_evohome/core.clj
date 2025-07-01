@@ -59,11 +59,14 @@
                   (reset! cache {:valid-until (+ now millis)
                                  :value (f)})))))))
 
-(defrecord Installation [locations index])
+(defrecord IndexedInstallation [locations index])
 
-(defn- get-installation* [c uid]
+(defn- fetch-indexed-installation [c uid]
   (let [installation (api/get-installation c uid :tcs? true)]
-    (->Installation installation (index-installation installation))))
+    (->IndexedInstallation installation (index-installation installation))))
+
+(defn- indexed-installation [c]
+  ((::installation c)))
 
 (defn authenticate-client
   "Like `api/authenticate-client`.  Return an augmented `api/ApiClient`
@@ -74,53 +77,62 @@
         user-id (:user-id (api/get-user-account client))]
     (-> client
         (assoc ::user-id user-id)
-        (assoc ::installation (cached #(get-installation* client user-id)
+        (assoc ::installation (cached #(fetch-indexed-installation client user-id)
                                       installation-ttl)))))
 
-(defn get-installation
-  "Much like api/get-installation, but it may return a cached version of
-  the installation, reducing the frequency of network queries for
-  mostly-static data.  Unlike `api/get-installation`, return an
-  Installation record with the REST API result in `:locations` and an
-  indexed version of the same object tree in `:index`."
-  [client]
-  ((::installation client)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defn- path->zone-id [c path]
-  (:zone-id (get-in (get-installation c) (concat [:index :zones] path))))
+  (:zone-id (get-in (indexed-installation c) (concat [:index :zones] path))))
 
 (defn- ->zone-id [c zone-or-path]
   (if (vector? zone-or-path)
-    (path->zone-id c zone-or-path)
+    (or (path->zone-id c zone-or-path)
+        (throw (ex-info "unknown zone path" {:client c :path zone-or-path})))
     zone-or-path))
 
 (defn- system-modes [system]
-  (map (comp csk/->kebab-case-keyword :system-mode)
-       (:allowed-system-modes system)))
+  (set (map (comp csk/->kebab-case-keyword :system-mode)
+            (:allowed-system-modes system))))
 
 (defn- location-modes [location]
-  (->> (location-temperature-control-systems location)
-       (map system-modes)
-       (apply set/intersection)))
-
-(defn- assert-mode-allowed [location mode]
-  (let [modes (location-modes location)]
-    (when-not (contains? modes mode)
-      (throw (ex-info "unknown mode for the installation"
-                      {:location location-id
-                       :mode mode
-                       :allowed modes})))))
+  (let [mode-sets (->> (location-temperature-control-systems location)
+                       (map system-modes))]
+    (if (next mode-sets)
+      (apply set/intersection mode-sets)
+      (first mode-sets))))
 
 (defn- find-location [c name-or-id]
-  (let [inst (get-installation c)]
+  (let [inst (indexed-installation c)]
     (or (get-in inst [:index :locations-by-name name-or-id])
-        (get-in inst [:index :locations-by-id name-or-id]))))
+        (get-in inst [:index :locations-by-id name-or-id])
+        (throw (ex-info "unknown location" {:client c :location name-or-id})))))
 
 (defn- location-temperature-control-systems [location]
   (->> (:gateways location)
        (mapcat :temperature-control-systems)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn get-installation
+  "Much like api/get-installation, but it may return a cached version of
+  the installation, reducing the frequency of network queries for
+  mostly-static data."
+  [client]
+  (:locations (indexed-installation client)))
+
+(defn get-location
+  "Much like api/get-location, but it may return a cached version of
+  the installation, reducing the frequency of network queries for
+  mostly-static data."
+  [client name-or-id]
+  (find-location client name-or-id))
+
+(defn- assert-mode-allowed [location mode]
+  (let [modes (location-modes location)]
+    (when-not (contains? modes mode)
+      (throw (ex-info "unknown mode to the installation"
+                      {:location (location-id location)
+                       :mode mode
+                       :allowed modes})))))
 
 (defn set-location-mode
   "Change the mode of all the temperature control systems at location.
