@@ -1,14 +1,11 @@
 (ns fourteatoo.clj-evohome.core
   (:require
    [camel-snake-kebab.core :as csk]
-   [clojure.core.memoize :as memo]
    [clojure.set :as set]
-   [fourteatoo.clj-evohome.api :as api]
-   [java-time :as jt]))
+   [fourteatoo.clj-evohome.api :as api]))
 
 
-(def ^:private user-ttl (* 60 60 1000))
-(def ^:private installation-ttl (* 10 60 1000))
+(def ^:private installation-ttl (* 15 60 1000))
 
 (defn- location-name [location]
   (get-in location [:location-info :name]))
@@ -19,9 +16,6 @@
 (defn- location-temperature-control-systems [location]
   (->> (:gateways location)
        (mapcat :temperature-control-systems)))
-
-(def get-user-account
-  (memo/ttl api/get-user-account :ttl/threshold user-ttl))
 
 (defn- index-zones [installation]
   (reduce (fn [m location]
@@ -49,19 +43,48 @@
      :locations-by-name locations-by-name
      :zones zones}))
 
+(defn- *nix-time []
+  (System/currentTimeMillis))
+
+(defn cached
+  "Cache `f`'s return value for `millis` milliseconds.  `f` must be a
+  function without arguments."
+  [f millis]
+  (let [cache (atom {:valid-until -1})]
+    (fn []
+      (let [now (*nix-time)
+            stored @cache]
+        (:value (if (< now (:valid-until stored))
+                  stored
+                  (reset! cache {:valid-until (+ now millis)
+                                 :value (f)})))))))
+
 (defrecord Installation [locations index])
 
-(defn- get-installation* [c]
-  (let [installation (api/get-installation c (:user-id (get-user-account c)) :tcs true)]
+(defn- get-installation* [c uid]
+  (let [installation (api/get-installation c uid :tcs? true)]
     (->Installation installation (index-installation installation))))
 
-(def get-installation
-  "Like api/get-installation, but it may return a cached version of the
-  installation, reducing the frequency of network queries for
+(defn authenticate-client
+  "Like `api/authenticate-client`.  Return an augmented `api/ApiClient`
+  that can be passed to other functions of this or the `api`
+  namespace."
+  [username password]
+  (let [client (api/authenticate-client username password)
+        user-id (:user-id (api/get-user-account client))]
+    (-> client
+        (assoc ::user-id user-id)
+        (assoc ::installation (cached #(get-installation* client user-id)
+                                      installation-ttl)))))
+
+(defn get-installation
+  "Much like api/get-installation, but it may return a cached version of
+  the installation, reducing the frequency of network queries for
   mostly-static data.  Unlike `api/get-installation`, return an
   Installation record with the REST API result in `:locations` and an
-  indexed version of the same data structure in `:index`."
-  (memo/ttl get-installation* :ttl/threshold installation-ttl))
+  indexed version of the same object tree in `:index`."
+  [client]
+  ((::installation client)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
