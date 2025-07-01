@@ -184,7 +184,7 @@
   accepts a pathname such as [\"Home\" \"Bedroom\"] as well as a zone
   ID."
   [client zone-path-or-id schedule]
-  (api/get-zone-schedule client (->zone-id client zone-path-or-id)))
+  (api/set-zone-schedule client (->zone-id client zone-path-or-id) schedule))
 
 (defn get-location-status
   "Get the status of the specified location.  Unlike
