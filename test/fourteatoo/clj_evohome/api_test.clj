@@ -5,7 +5,7 @@
             [java-time :as jt]))
 
 (def dummy-client
-  (api/->EvoClient "john@smith.address"
+  (api/->ApiClient "john@smith.address"
                    "password"
                    (atom {:access-token "access token",
                           :token-type "bearer",

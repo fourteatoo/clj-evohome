@@ -54,11 +54,11 @@
       :tokens
       deref))
 
-(defrecord EvoClient [username password tokens])
+(defrecord ApiClient [username password tokens])
 
 (defn authenticate-client [username password]
   (let [tokens (basic-login username password)]
-    (->EvoClient username password (atom tokens))))
+    (->ApiClient username password (atom tokens))))
 
 (defn- make-http-headers [client]
   (let [{:keys [access-token token-type]} (auth-tokens client)]
@@ -67,7 +67,7 @@
 
 (defn- wrap-http [op]
   (fn [client path & {:as opts}]
-    {:pre [(instance? EvoClient client)]}
+    {:pre [(instance? ApiClient client)]}
     (:json (op (str api-url "/" path)
                (http/merge-http-opts {:headers (make-http-headers client)}
                                      opts)))))
@@ -83,7 +83,7 @@
   "Query the user account basic data, such as name, surname, address,
   language, user ID, etc.  Return a map."
   [client]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (http-get client "userAccount"))
 
 (defn get-installation
@@ -93,7 +93,7 @@
   adrress, gateways, etc.  If `tcs?` is true, include the temperature
   control systems.  Return a sequence of maps."
   [client user-id & {:keys [tcs?]}]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (http-get client "location/installationInfo"
             :query-params {:includeTemperatureControlSystems (boolean tcs?)
                            :userId user-id}))
@@ -104,7 +104,7 @@
   If `tcs?` is true, include the temperature control systems.  Return
   a map.  See also `get-installation`."
   [client location & {:keys [tcs?]}]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (http-get client (str "location/" location "/installationInfo")
             :query-params {:includeTemperatureControlSystems (boolean tcs?)}))
 
@@ -112,7 +112,7 @@
   "Query a specific temperature control system.  A system is associated
   to a gateway and they may be the same physical thing.  Return a map."
   [client system-id]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (http-get client (str "temperatureControlSystem/" system-id "/status")))
 
 (defn set-system-mode
@@ -122,7 +122,7 @@
   list of permitted values.  Set it permanently if `until` is not
   specified."
   [client system-id mode & {:keys [until]}]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (http-put client (str "temperatureControlSystem/" system-id "/mode")
             :form-params {:SystemMode (csk/->camelCaseString mode)
                           :TimeUntil (when until (str until))
@@ -137,7 +137,7 @@
   "Set the specific zone's temperature.  Set it permanently if `until`
   is not specified."
   [client zone-id temperature & {:keys [until]}]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (zone-heat-set-point client "temperatureZone" zone-id
                        {:SetpointMode (if until
                                         "TemporaryOverride"
@@ -149,21 +149,21 @@
   "Cancel a previous `set-zone-temperature`.
   This will effectively resume the normal schedule."
   [client zone-id]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (zone-heat-set-point client "temperatureZone" zone-id
                        {:SetpointMode "FollowSchedule"}))
 
 (defn get-zone-schedule
   "Return the daily schedule of zone with ID `zone-id`"
   [client zone-id]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (http-get client (str "temperatureZone/" zone-id "/schedule")))
 
 (defn set-zone-schedule
   "Set the specified `zone-id` to have the daily plan `schedule`. See
   `get-zone-schedule`."
   [client zone-id schedule]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (http-put client (str "temperatureZone/" zone-id "/schedule")
             :content-type "application/json"
             :body schedule))
@@ -173,14 +173,14 @@
   true include the temperature control systems within and their
   relative zones."
   [client location-id & {:keys [tcs?]}]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (http-get client (str "location/" location-id "/status")
             :query-params {:includeTemperatureControlSystems (boolean tcs?)}))
 
 (defn get-domestic-hot-water
   "Get the status of the domestic hot water."
   [client dhw-id]
-  {:pre [(instance? EvoClient client)]}
+  {:pre [(instance? ApiClient client)]}
   (http-get client (str "domesticHotWater/" dhw-id "/status")))
 
 (defn set-domestic-hot-water
@@ -188,7 +188,7 @@
   `until` is not specified.  If `state` is `:auto` the normal schedule
   is resumed, thus cancelling any previous setting."
   [client dhw-id state & {:keys [until]}]
-  {:pre [(instance? EvoClient client)
+  {:pre [(instance? ApiClient client)
          (keyword? state)]}
   (http-put client (str "domesticHotWater/" dhw-id "/status")
             :form-params {:Mode (cond (= state :auto) "FollowSchedule"
