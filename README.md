@@ -53,13 +53,13 @@ Get information about your account
 List all the installations belonging to a user
 
 ```clojure
-(def insts (api/get-installations c (:user-id acc-info)))
+(def insts (api/get-installation c (:user-id acc-info)))
 ```
 
 Get the installation at a specific location
 
 ```clojure
-(def inst1 (api/get-installation-at-location c (get-in (first insts) [:location-info :location-id])))
+(def inst1 (api/get-location c (get-in (first insts) [:location-info :location-id])))
 ```
 
 Get a system status and change its mode
