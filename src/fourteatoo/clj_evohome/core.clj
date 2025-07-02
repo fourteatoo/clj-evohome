@@ -1,9 +1,10 @@
 (ns fourteatoo.clj-evohome.core
   (:require
    [camel-snake-kebab.core :as csk]
+   [clojure.pprint :as pp]
    [clojure.set :as set]
-   [fourteatoo.clj-evohome.api :as api]))
-
+   [fourteatoo.clj-evohome.api :as api]
+   [clojure.string :as s]))
 
 (def ^:private installation-ttl (* 15 60 1000))
 
@@ -110,7 +111,33 @@
   (->> (:gateways location)
        (mapcat :temperature-control-systems)))
 
+(defn- location-zones [loc]
+  (->> (location-temperature-control-systems loc)
+       (mapcat :zones)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn pprint-installation-index
+  "Print two reference tables for the installation.  One with with the
+  name and ID of the locations.  The second with the name and ID of
+  the zones."
+  [inst]
+  (println "Locations:")
+  (pp/print-table (map (fn [loc]
+                         {:location (location-name loc)
+                          :id (location-id loc)
+                          :systems (->> (location-temperature-control-systems loc)
+                                        (map :system-id)
+                                        (s/join ","))})
+                       inst))
+  (println "Zones:")
+  (pp/print-table (mapcat (fn [loc]
+                            (map (fn [z]
+                                   {:location (location-name loc)
+                                    :zone (:name z)
+                                    :id (:zone-id z)})
+                                 (location-zones loc)))
+                          inst)))
 
 (defn get-installation
   "Much like api/get-installation, but it may return a cached version of
