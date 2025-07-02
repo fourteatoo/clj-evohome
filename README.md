@@ -189,7 +189,7 @@ primitives require just the zone, location, or system ID, to uniquely
 identify your device/area.  The locations and the zones have a name,
 too, that can be assigned by the user.  The locations will have names
 like "Home" or "Office", while zones will have names like "Kitchen",
-"Bedroom", "Kids", "Livingroom", etc.
+"Bedroom", "Kids", "Living room", etc.
 
 The low-level API requires you to use the IDs, while there is an
 higher-level layer that allows you to use name paths, to identify your
