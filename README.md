@@ -157,10 +157,11 @@ to the following functions.
 
 ... and so on.
 
-To print a reference table of the devices in your installation:
+If you prefer to work with the original IDs, you can print a reference
+table of the devices in your installation:
 
 ```clojure
-(capi/pprint-installation-index (capi/get-installation c))
+(capi/print-installation-index (capi/get-installation c))
 ```
 
 

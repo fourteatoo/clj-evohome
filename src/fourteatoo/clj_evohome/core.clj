@@ -125,7 +125,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn pprint-installation-index
+(defn print-installation-index
   "Print two reference tables for the installation.  One with with the
   name and ID of the locations.  The second with the name and ID of
   the zones."
