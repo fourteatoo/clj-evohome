@@ -45,7 +45,7 @@ In your code, first you need to authenticate yourself with the server
 ```
 
 The function `api/authenticate-client` returns an api/ApiClient record
-that you need for the other functions in the namespace.
+that you need to pass to the other functions below.
 
 Get information about your account with
 
