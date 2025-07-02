@@ -44,28 +44,31 @@ In your code, first you need to authenticate yourself with the server
 (def c (api/authenticate-client "username" "password"))
 ```
 
-Get information about your account
+The function `api/authenticate-client` returns an api/ApiClient record
+that you need for the other functions in the namespace.
+
+Get information about your account with
 
 ```clojure
 (def acc-info (api/get-user-account c))
 ```
 
-List all the installations belonging to a user
+List all the locations belonging to a user
 
 ```clojure
-(def insts (api/get-installation c (:user-id acc-info)))
+(def inst (api/get-installation c (:user-id acc-info)))
 ```
 
 Get the installation at a specific location
 
 ```clojure
-(def inst1 (api/get-location c (get-in (first insts) [:location-info :location-id])))
+(def loc (api/get-location c (get-in (first inst) [:location-info :location-id])))
 ```
 
 Get a system status and change its mode
 
 ```clojure
-(def system (-> inst1
+(def system (-> loc
                 :gateways
                 first
                 :temperature-control-systems
@@ -84,6 +87,7 @@ Get a specific zone's schedule
 Set a zone schedule
 
 ```clojure
+;; [...]
 (api/set-zone-schedule c (:zone-id zone) sched)
 ```
 
@@ -102,10 +106,10 @@ Cancel a zone override
 Get a location status
 
 ```clojure
-(api/get-location-status c (get-in inst1 [:location-info :location-id]))
+(api/get-location-status c (get-in loc [:location-info :location-id]))
 ```
 
-### Friendlier abstraction (the `core` namespace)
+### Friendlier interface (the `core` namespace)
 
 Although the `fourteatoo.clj-evohome.api` namespace provides the
 essential functionality of the REST API, beside the authentication
@@ -132,7 +136,7 @@ It will return a slightly different ApiClient which needs to be used
 in the following calls.
 
 ```clojure
-(def insts (capi/get-installation c))
+(def inst (capi/get-installation c))
 ```
 
 ```clojure
