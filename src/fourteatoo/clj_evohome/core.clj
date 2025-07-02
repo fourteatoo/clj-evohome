@@ -8,14 +8,21 @@
 
 (def ^:private installation-ttl (* 15 60 1000))
 
-(defn- location-name [location]
-  (get-in location [:location-info :name]))
+(defn location-name
+  "Return the name of the location `loc`."
+  [loc]
+  (get-in loc [:location-info :name]))
 
-(defn- location-id [location]
-  (get-in location [:location-info :location-id]))
+(defn location-id
+  "Return the ID of the location `loc`."
+  [loc]
+  (get-in loc [:location-info :location-id]))
 
-(defn- location-temperature-control-systems [location]
-  (->> (:gateways location)
+(defn location-temperature-control-systems
+  "Return the list of the temperature control systems belonging to
+  location `loc`."
+  [loc]
+  (->> (:gateways loc)
        (mapcat :temperature-control-systems)))
 
 (defn- index-zones [installation]
