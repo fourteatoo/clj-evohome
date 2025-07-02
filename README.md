@@ -119,7 +119,7 @@ In the namespace `fourteatoo.clj-evohome.core` there is a thin layer
 atop the basic `fourteatoo.clj-evohome.api`.  It simplifies aspects
 like addressing your objects by path, rather than ID.  The names
 asssigned by the user become identifiers.  Locations can be identified
-with strings like "Home" or "Shop" and zones can be addressed by their
+with strings like ["Home"] or ["Shop"] and zones can be addressed by their
 path, like ["Home" "Bedroom"] or ["Shop" "Toilet"].  Internally a copy
 of the installation is cached, to reduce the amount of queries.  That
 means, there will be a delay between, say, the installation of a new
@@ -132,15 +132,15 @@ First you need to authenticate
 (def c (capi/authenticate-client "username" "password"))
 ```
 
-It will return a slightly different ApiClient which needs to be used
-in the following calls.
+It will return a slightly different ApiClient which needs to be passed
+to the following functions.
 
 ```clojure
 (def inst (capi/get-installation c))
 ```
 
 ```clojure
-(def loc (capi/get-location c "Home"))
+(def loc (capi/get-location c ["Home"))
 ```
 
 ```clojure
@@ -152,11 +152,16 @@ in the following calls.
 ```
 
 ```clojure
-(capi/get-location-status c "Home")
+(capi/get-location-status c ["Home"])
 ```
 
 ... and so on.
 
+To print a reference table of the devices in your installation:
+
+```clojure
+(capi/pprint-installation-index (capi/get-installation c))
+```
 
 
 ## Documentation
@@ -196,7 +201,7 @@ like "Home" or "Office", while zones will have names like "Kitchen",
 "Bedroom", "Kids", "Living room", etc.
 
 The low-level API requires you to use the IDs, while there is an
-higher-level layer that allows you to use name paths, to identify your
+higher-level layer that allows you to use paths, to identify your
 devices.  That is `["Home" "Kitchen"]` rather than the zone ID
 `"162534"`.
 

@@ -103,8 +103,9 @@
 
 (defn- find-location [c name-or-id]
   (let [inst (indexed-installation c)]
-    (or (get-in inst [:index :locations-by-name name-or-id])
-        (get-in inst [:index :locations-by-id name-or-id])
+    (or (if (vector? name-or-id)
+          (get-in inst [:index :locations-by-name (first name-or-id)])
+          (get-in inst [:index :locations-by-id name-or-id]))
         (throw (ex-info "unknown location" {:client c :location name-or-id})))))
 
 (defn- location-temperature-control-systems [location]

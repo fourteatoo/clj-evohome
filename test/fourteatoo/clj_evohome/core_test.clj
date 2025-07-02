@@ -213,24 +213,28 @@
 
 (deftest get-location
   (is (= dummy-location
-         (core/get-location dummy-client "Home")))
+         (core/get-location dummy-client ["Home"])))
   (is (= dummy-location
          (core/get-location dummy-client "1234567")))
   (is (thrown? Exception
-               (core/get-location dummy-client "foobar"))))
+               (core/get-location dummy-client "foobar")))
+  (is (thrown? Exception
+               (core/get-location dummy-client ["foobar"]))))
 
 (comment
-  (mock/call-with-mocks #(core/set-location-mode dummy-client "Home" :away)))
+  (mock/call-with-mocks #(core/set-location-mode dummy-client ["Home"] :away)))
 
 (deftest set-location-mode
   (is (nil?
-         (core/set-location-mode dummy-client "Home" :away)))
+       (core/set-location-mode dummy-client ["Home"] :away)))
   (is (nil?
-         (core/set-location-mode dummy-client "1234567" :day-off)))
+       (core/set-location-mode dummy-client "1234567" :day-off)))
   (is (thrown? Exception
                (core/set-location-mode dummy-client "1234567" :foo-bar)))
   (is (thrown? Exception
-               (core/set-location-mode dummy-client "foobar" :away))))
+               (core/set-location-mode dummy-client "foobar" :away)))
+  (is (thrown? Exception
+               (core/set-location-mode dummy-client ["foobar"] :away))))
 
 (deftest get-location-systems-status
   (is (= [{:opts
@@ -239,7 +243,7 @@
 	     {:accept "application/json", :authorization "bearer access token"}},
 	    :url
 	    "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/1111111/status"}]
-         (core/get-location-systems-status dummy-client "Home")))
+         (core/get-location-systems-status dummy-client ["Home"])))
   (is (= [{:opts
 	    {:body nil,
 	     :headers
@@ -345,7 +349,7 @@
 	   {:accept "application/json", :authorization "bearer access token"},
 	   :query-params {:include-temperature-control-systems false},
 	   :body nil}}
-         (core/get-location-status dummy-client "Home")))
+         (core/get-location-status dummy-client ["Home"])))
   (is (= {:url	  
 	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/1234567/status",
 	  :opts
