@@ -56,7 +56,7 @@
 
 (defn- cached
   "Cache `f`'s return value for `millis` milliseconds.  `f` must be a
-  function without arguments."
+  function without arguments.  Return a function."
   [f millis]
   (let [cache (atom {:valid-until -1})]
     (fn []
