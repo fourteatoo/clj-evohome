@@ -115,10 +115,6 @@
           (get-in inst [:index :locations-by-id name-or-id]))
         (throw (ex-info "unknown location" {:client c :location name-or-id})))))
 
-(defn- location-temperature-control-systems [location]
-  (->> (:gateways location)
-       (mapcat :temperature-control-systems)))
-
 (defn- location-zones [loc]
   (->> (location-temperature-control-systems loc)
        (mapcat :zones)))
