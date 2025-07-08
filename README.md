@@ -181,7 +181,7 @@ The following
 is the same as
 
 ```clojure
-(api/set-zone-temperature c (api/find-zone-id ["Home" "Bedroom"] inst) 17.5)
+(api/set-zone-temperature c (api/find-zone-id "Home" "Bedroom" inst) 17.5)
 ```
 
 AFAIK, the IDs do not change, so it is up to you whether you want to

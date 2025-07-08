@@ -107,8 +107,9 @@
        (mapcat :zones)))
 
 (defn find-zone-id
-  "Return the zone ID pointed by the pair of names [`location` `zone`]."
-  [[location zone] inst]
+  "Return the zone ID in `inst` pointed by the pair of names `location`
+  `zone`."
+  [location zone inst]
   (->> (installation-locations location inst)
        (mapcat location-zones)
        (filter #(= zone (:zone-name %)))
