@@ -157,12 +157,35 @@ to the following functions.
 
 ... and so on.
 
+The function `capi/set-location-mode` applies the mode to all the
+systems belonging to the same location, provided the mode is supported
+by all the systems within.
+
+```clojure
+(capi/set-location-mode c [Home] :day-off)
+```
+
 If you prefer to work with the original IDs, you can print a reference
 table of the devices in your installation:
 
 ```clojure
-(capi/print-installation-index (capi/get-installation c))
+(api/print-installation-index (api/get-installation c (:user-id acc-info)))
 ```
+
+The following
+
+```clojure
+(capi/set-zone-temperature c ["Home" "Bedroom"] 17.5)
+```
+
+is the same as
+
+```clojure
+(api/set-zone-temperature c (api/find-zone-id ["Home" "Bedroom"] inst) 17.5)
+```
+
+AFAIK, the IDs do not change, so it is up to you whether you want to
+work with names or IDs.
 
 
 ## Documentation
@@ -203,18 +226,10 @@ too, that can be assigned by the user.  The locations will have names
 like "Home" or "Office", while zones will have names like "Kitchen",
 "Bedroom", "Kids", "Living room", etc.
 
-The low-level API requires you to use the IDs, while there is an
-higher-level layer that allows you to use paths, to identify your
-devices.  That is `["Home" "Kitchen"]` rather than the zone ID
-`"162534"`.
-
 Temperature control systems have user-defined modes.  Those are always
 referenced by name; names such as `:day-off`, `:away`, `:auto`, etc.
 The function `api/set-system-mode` works on a specific control system,
-not on the entire location it belongs to.  The function
-`capi/set-location-mode` applies the mode to all the systems belonging
-to the same location, provided the mode is supported by all the
-systems within.
+not on the entire location it belongs to.
 
 
 
