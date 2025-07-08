@@ -1,4 +1,4 @@
-(defproject io.github.fourteatoo/clj-evohome "1.0.1-SNAPSHOT"
+(defproject io.github.fourteatoo/clj-evohome "1.1.0-SNAPSHOT"
   :description "A simple Clojure interface to Honeywell EVO Home"
   :url "http://github.com/fourteatoo/clj-evohome"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
