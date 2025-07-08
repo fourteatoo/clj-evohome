@@ -190,6 +190,8 @@ temperature control systems.  Each temperature control system has a
 number of zones; the actuators and sensors.  Physically, if you bought
 an EvoTouch panel, the temperature control system is also the gateway.
 
+![object tree](doc/object_tree.png)
+
 A single apartment installation has typically just one location, one
 gateway, one temperature control system (which is the gateway too) and
 several zones (one for each room).
