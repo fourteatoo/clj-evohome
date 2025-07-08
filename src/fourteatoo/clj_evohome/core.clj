@@ -1,33 +1,15 @@
 (ns fourteatoo.clj-evohome.core
   (:require
    [camel-snake-kebab.core :as csk]
-   [clojure.pprint :as pp]
    [clojure.set :as set]
    [fourteatoo.clj-evohome.api :as api]
    [clojure.string :as s]))
 
 (def ^:private installation-ttl (* 15 60 1000))
 
-(defn location-name
-  "Return the name of the location `loc`."
-  [loc]
-  (get-in loc [:location-info :name]))
-
-(defn location-id
-  "Return the ID of the location `loc`."
-  [loc]
-  (get-in loc [:location-info :location-id]))
-
-(defn location-temperature-control-systems
-  "Return the list of the temperature control systems belonging to
-  location `loc`."
-  [loc]
-  (->> (:gateways loc)
-       (mapcat :temperature-control-systems)))
-
 (defn- index-zones [installation]
   (reduce (fn [m location]
-            (assoc m (location-name location)
+            (assoc m (api/location-name location)
                    (->> (:gateways location)
                         (mapcat (fn [gateway]
                                   (mapcat (fn [tcs]
@@ -44,8 +26,8 @@
           {} installation))
 
 (defn- index-installation [installation]
-  (let [locations-by-name (index-locations installation location-name)
-        locations-by-id (index-locations installation location-id)
+  (let [locations-by-name (index-locations installation api/location-name)
+        locations-by-id (index-locations installation api/location-id)
         zones (index-zones installation)]
     {:locations-by-id locations-by-id
      :locations-by-name locations-by-name
@@ -102,7 +84,7 @@
             (:allowed-system-modes system))))
 
 (defn- location-modes [location]
-  (let [mode-sets (->> (location-temperature-control-systems location)
+  (let [mode-sets (->> (api/location-temperature-control-systems location)
                        (map system-modes))]
     (if (next mode-sets)
       (apply set/intersection mode-sets)
@@ -115,33 +97,7 @@
           (get-in inst [:index :locations-by-id name-or-id]))
         (throw (ex-info "unknown location" {:client c :location name-or-id})))))
 
-(defn- location-zones [loc]
-  (->> (location-temperature-control-systems loc)
-       (mapcat :zones)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn print-installation-index
-  "Print two reference tables for the installation.  One with with the
-  name and ID of the locations.  The second with the name and ID of
-  the zones."
-  [inst]
-  (println "Locations:")
-  (pp/print-table (map (fn [loc]
-                         {:location (location-name loc)
-                          :id (location-id loc)
-                          :systems (->> (location-temperature-control-systems loc)
-                                        (map :system-id)
-                                        (s/join ","))})
-                       inst))
-  (println "Zones:")
-  (pp/print-table (mapcat (fn [loc]
-                            (map (fn [z]
-                                   {:location (location-name loc)
-                                    :zone (:name z)
-                                    :id (:zone-id z)})
-                                 (location-zones loc)))
-                          inst)))
 
 (defn get-installation
   "Much like api/get-installation, but it may return a cached version of
@@ -161,7 +117,7 @@
   (let [modes (location-modes location)]
     (when-not (contains? modes mode)
       (throw (ex-info "unknown mode to the installation"
-                      {:location (location-id location)
+                      {:location (api/location-id location)
                        :mode mode
                        :allowed modes})))))
 
@@ -174,7 +130,7 @@
   [c location-name-or-id mode]
   (let [loc (find-location c location-name-or-id)]
     (assert-mode-allowed loc mode)
-    (->> (location-temperature-control-systems loc)
+    (->> (api/location-temperature-control-systems loc)
          (map :system-id)
          (run! #(api/set-system-mode c % mode)))))
 
@@ -183,7 +139,7 @@
   sequence of maps.  See also `api/get-system-status`."
   [client location-name-or-id]
   (let [loc (find-location client location-name-or-id)]
-    (->> (location-temperature-control-systems loc)
+    (->> (api/location-temperature-control-systems loc)
          (map :system-id)
          (map (partial api/get-system-status client)))))
 
@@ -223,4 +179,4 @@
   such as \"Home\" as well as a location ID."
   [client location-name-or-id & args]
   (let [loc (find-location client location-name-or-id)]
-    (apply api/get-location-status client (location-id loc) args)))
+    (apply api/get-location-status client (api/location-id loc) args)))

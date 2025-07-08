@@ -1,6 +1,7 @@
 (ns fourteatoo.clj-evohome.api
   "Interface to the current (v1) REST API."
   (:require [clojure.string :as s]
+            [clojure.pprint :as pp]
             [fourteatoo.clj-evohome.http :as http]
             [cheshire.core :as json]
             [camel-snake-kebab.core :as csk]
@@ -77,6 +78,80 @@
 (def ^:private http-put (wrap-http #'http/http-put))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn location-name
+  "Return the name of the location `loc`."
+  [loc]
+  (get-in loc [:location-info :name]))
+
+(defn location-id
+  "Return the ID of the location `loc`."
+  [loc]
+  (get-in loc [:location-info :location-id]))
+
+(defn- installation-locations
+  "Return a list of locations matching name from those in
+  `installation`."
+  [name inst]
+  (filter #(= name (location-name %)) inst))
+
+(defn location-temperature-control-systems
+  "Return the list of the temperature control systems belonging to
+  location `loc`."
+  [loc]
+  (->> (:gateways loc)
+       (mapcat :temperature-control-systems)))
+
+(defn- location-zones [loc]
+  (->> (location-temperature-control-systems loc)
+       (mapcat :zones)))
+
+(defn find-zone-id
+  "Return the zone ID pointed by the pair of names [`location` `zone`]."
+  [[location zone] inst]
+  (->> (installation-locations location inst)
+       (mapcat location-zones)
+       (filter #(= zone (:zone-name %)))
+       first
+       :zone-id))
+
+(defn find-location-id
+  "Return the location ID with name `name` in installation `inst`."
+  [name inst]
+  (->> (installation-locations name inst)
+       first
+       location-id))
+
+(defn find-temperature-control-system-ids
+  "Find the temperature control system IDs at `location-name` in
+  installation `inst`.  Return a list."
+  [location-name inst]
+  (->> (installation-locations location-name inst)
+       (mapcat location-temperature-control-systems)
+       (map :system-id)))
+
+(defn print-installation-index
+  "Print two reference tables for the installation.  One with with the
+  name and ID of the locations.  The second with the name and ID of
+  the zones."
+  [inst]
+  (println "Locations:")
+  (pp/print-table (map (fn [loc]
+                         {:location (location-name loc)
+                          :id (location-id loc)
+                          :systems (->> (location-temperature-control-systems loc)
+                                        (map :system-id)
+                                        (s/join ","))})
+                       inst))
+  (println "Zones:")
+  (pp/print-table (mapcat (fn [loc]
+                            (map (fn [z]
+                                   {:location (location-name loc)
+                                    :zone (:name z)
+                                    :id (:zone-id z)})
+                                 (location-zones loc)))
+                          inst)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn get-user-account
