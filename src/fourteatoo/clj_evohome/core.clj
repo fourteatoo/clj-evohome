@@ -95,7 +95,7 @@
     (or (if (vector? name-or-id)
           (get-in inst [:index :locations-by-name (first name-or-id)])
           (get-in inst [:index :locations-by-id name-or-id]))
-        (throw (ex-info "unknown location" {:client c :location name-or-id})))))
+        (throw (ex-info "unknown location" {:installation inst :location name-or-id})))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
