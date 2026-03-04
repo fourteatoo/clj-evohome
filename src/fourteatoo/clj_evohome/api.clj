@@ -8,7 +8,7 @@
             [java-time :as jt]))
 
 
-(def ^:private host-url "https://tccna.honeywell.com")
+(def ^:private host-url "https://tccna.resideo.com")
 
 (def ^:private api-url (str host-url "/WebAPI/emea/api/v1"))
 
