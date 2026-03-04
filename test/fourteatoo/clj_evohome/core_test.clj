@@ -242,14 +242,14 @@
 	     :headers
 	     {:accept "application/json", :authorization "bearer access token"}},
 	    :url
-	    "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/1111111/status"}]
+	    "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureControlSystem/1111111/status"}]
          (core/get-location-systems-status dummy-client ["Home"])))
   (is (= [{:opts
 	    {:body nil,
 	     :headers
 	     {:accept "application/json", :authorization "bearer access token"}},
 	    :url
-	    "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureControlSystem/1111111/status"}]
+	    "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureControlSystem/1111111/status"}]
          (core/get-location-systems-status dummy-client "1234567")))
   (is (thrown? Exception
                (core/get-location-systems-status dummy-client "foobar"))))
@@ -262,7 +262,7 @@
 	   :headers
 	   {:accept "application/json", :authorization "bearer access token"}},
 	  :url
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/3333333/heatSetPoint"}
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureZone/3333333/heatSetPoint"}
          (core/set-zone-temperature dummy-client ["Home" "Kitchen"] 12.3)))
   (is (= {:opts
 	  {:body
@@ -271,7 +271,7 @@
 	   :headers
 	   {:accept "application/json", :authorization "bearer access token"}},
 	  :url
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/5555555/heatSetPoint"}
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureZone/5555555/heatSetPoint"}
          (core/set-zone-temperature dummy-client ["Home" "Living room"] 23.4)))
   (is (= {:opts
 	  {:body
@@ -280,12 +280,12 @@
 	   :headers
 	   {:accept "application/json", :authorization "bearer access token"}},
 	  :url
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/5555555/heatSetPoint"}
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureZone/5555555/heatSetPoint"}
          (core/set-zone-temperature dummy-client "5555555" 23.4))))
 
 (deftest cancel-zone-override
   (is (= {:url
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/3333333/heatSetPoint",
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureZone/3333333/heatSetPoint",
 	  :opts
 	  {:headers
 	   {:accept "application/json", :authorization "bearer access token"},
@@ -296,21 +296,21 @@
 
 (deftest get-zone-schedule
   (is (= {:url	  
-	   "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/2222222/schedule",
+	   "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureZone/2222222/schedule",
 	   :opts
 	   {:headers
 	    {:accept "application/json", :authorization "bearer access token"},
 	    :body nil}}
          (core/get-zone-schedule dummy-client ["Home" "Bedroom"])))
   (is (= {:url
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/2222222/schedule",
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureZone/2222222/schedule",
 	  :opts
 	  {:headers
 	   {:accept "application/json", :authorization "bearer access token"},
 	   :body nil}}
          (core/get-zone-schedule dummy-client "2222222")))
   (is (= {:url
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/foobar/schedule",
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureZone/foobar/schedule",
 	  :opts
 	  {:headers
 	   {:accept "application/json", :authorization "bearer access token"},
@@ -321,7 +321,7 @@
 
 (deftest set-zone-schedule
   (is (= {:url
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/3333333/schedule",
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureZone/3333333/schedule",
 	  :opts
 	  {:headers
 	   {:accept "application/json", :authorization "bearer access token"},
@@ -329,7 +329,7 @@
 	   :body "{\"foo\":1,\"bar\":2}"}}
          (core/set-zone-schedule dummy-client ["Home" "Kitchen"] {:foo 1 :bar 2})))
   (is (= {:url
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/temperatureZone/3333333/schedule",
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/temperatureZone/3333333/schedule",
 	  :opts
 	  {:headers
 	   {:accept "application/json", :authorization "bearer access token"},
@@ -343,7 +343,7 @@
 
 (deftest get-location-status
   (is (= {:url	  
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/1234567/status",
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/location/1234567/status",
 	  :opts
 	  {:headers
 	   {:accept "application/json", :authorization "bearer access token"},
@@ -351,7 +351,7 @@
 	   :body nil}}
          (core/get-location-status dummy-client ["Home"])))
   (is (= {:url	  
-	  "https://tccna.honeywell.com/WebAPI/emea/api/v1/location/1234567/status",
+	  "https://tccna.resideo.com/WebAPI/emea/api/v1/location/1234567/status",
 	  :opts
 	  {:headers
 	   {:accept "application/json", :authorization "bearer access token"},
