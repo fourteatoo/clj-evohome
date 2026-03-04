@@ -17,13 +17,32 @@
 (def ^:private authorization-token
   "NGEyMzEwODktZDJiNi00MWJkLWE1ZWItMTZhMGE0MjJiOTk5OjFhMTVjZGI4LTQyZGUtNDA3Yi1hZGQwLTA1OWY5MmM1MzBjYg==")
 
-(defn- get-auth-tokens [credentials]
+(def ^:private auth-max-freq (* 60 1000))
+
+
+(defn- now []
+  (System/currentTimeMillis))
+
+(defn rate-limit [f ms]
+  (let [latest (atom (- (now) ms 1))]
+    (fn [& args]
+      (let [now (now)]
+        (if (> now (+ @latest ms))
+          (do (reset! latest now)
+              (apply f args))
+          (throw (ex-info "called too often"
+                          {:f f :ms ms :latest @latest})))))))
+
+(defn- get-auth-tokens* [credentials]
   (let [tokens (-> (http/http-post auth-url
                                    {:form-params credentials
                                     :headers {:authorization (str "Basic " authorization-token)}})
                    :json)]
     (assoc tokens :expires (jt/plus (jt/local-date-time)
                                     (jt/seconds (:expires-in tokens))))))
+
+(def ^:private get-auth-tokens
+  (rate-limit get-auth-tokens* auth-max-freq))
 
 (defn- basic-login [username password]
   (get-auth-tokens {:grant_type "password"
