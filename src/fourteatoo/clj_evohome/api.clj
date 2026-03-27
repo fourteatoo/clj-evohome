@@ -36,7 +36,7 @@
 (defn- get-auth-tokens* [credentials]
   (let [tokens (-> (http/http-post auth-url
                                    {:form-params credentials
-                                    :headers {:authorization (str "Basic " authorization-token)}})
+                                    :headers {"authorization" (str "Basic " authorization-token)}})
                    :json)]
     (assoc tokens :expires (jt/plus (jt/local-date-time)
                                     (jt/seconds (:expires-in tokens))))))
@@ -82,8 +82,8 @@
 
 (defn- make-http-headers [client]
   (let [{:keys [access-token token-type]} (auth-tokens client)]
-    {:accept "application/json"
-     :authorization (str token-type " " access-token)}))
+    {"accept" "application/json"
+     "authorization" (str token-type " " access-token)}))
 
 (defn- wrap-http [op]
   (fn [client path & {:as opts}]

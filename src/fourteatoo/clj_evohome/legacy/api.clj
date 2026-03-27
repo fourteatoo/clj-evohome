@@ -18,7 +18,7 @@
     (-> (op (str base-url "/" path)
             (http/merge-http-opts
              {:headers (if connection
-                         {:SessionId (get-in connection [:session :session-id])}
+                         {"SessionId" (get-in connection [:session :session-id])}
                          {})
               :content-type "application/json"
               :accept "application/json"
@@ -33,14 +33,13 @@
 (defrecord EvoSession [cookie-jar session])
 
 (defn connect [username password & [application-id]]
-  (let [cookie-jar (http/make-cookie-jar)]
-    (->EvoSession cookie-jar
-                  (http-post nil "Session"
-                             {:body {:Username username
-                                     :Password password
-                                     :ApplicationId (or application-id
-                                                        default-application-id)}
-                              :cookie-store cookie-jar}))))
+  (->EvoSession http/default-client
+                (http-post nil "Session"
+                           {:body {:Username username
+                                   :Password password
+                                   :ApplicationId (or application-id
+                                                      default-application-id)}
+                            :http-client http/default-client})))
 
 (defn get-locations [connection]
   (http-get connection "locations"

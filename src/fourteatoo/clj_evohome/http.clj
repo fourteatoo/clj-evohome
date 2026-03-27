@@ -1,16 +1,13 @@
 (ns fourteatoo.clj-evohome.http
-  "Various fairly low level HTTP primitives and wrappers of `clj-http`."
+  "Various fairly low level HTTP primitives."
   {:no-doc true}
   (:require [clojure.string :as s]
-            [clj-http.client :as http]
-            clj-http.cookies
+            [hato.client :as http]
             [cheshire.core :as json]
             [camel-snake-kebab.core :as csk]))
 
-(def make-cookie-jar
-  clj-http.cookies/cookie-store)
 
-(defonce default-cookie-jar (make-cookie-jar))
+(defonce default-client (http/build-http-client {}))
 
 (defn- keywordify-map [m]
   (->> (map (juxt (comp keyword s/lower-case name key) val) m)
@@ -45,7 +42,7 @@
                       response))]
       (-> (try
             (action (str url)
-                    (merge {:cookie-store default-cookie-jar}
+                    (merge {:http-client default-client}
                            (update opts :body
                                    (fn [body]
                                      (if (map? body)
